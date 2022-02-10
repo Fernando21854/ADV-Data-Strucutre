@@ -1,0 +1,283 @@
+public class AVLProjectTwo<K extends Comparable<K>,V> 
+{
+    public static void main(String[] args) {
+        AVLProjectTwo<Integer,Integer> map=new AVLProjectTwo<>();
+        AVLProjectTwo<Integer,Integer> map2=new AVLProjectTwo<>();
+        System.out.println("Problem 1");
+        map.add(93,0);
+        map.add(59,0);
+        map.add(27,0);
+        map.add(12,0);
+        map.add(99,0);
+        map.add(40,0);
+        map.add(68,0);
+        map.add(36,0);
+        map.add(43,0);
+        map.add(76,0);
+        map.add(35,0);
+        map.add(26,0);
+        map.add(50,0);
+        map.add(24,0);
+        map.add(64,0);
+        map.midOrder();
+        System.out.println(" ");
+        System.out.println("Deleting: ");
+        map.delete(68);
+        map.delete(59);
+        map.delete(26);
+        map.delete(50);
+        map.delete(64);
+        map.delete(93);
+        map.midOrder();
+        System.out.println(" ");
+        System.out.println("Problem 2 ");
+        map2.add(58,0);
+        map2.add(70,0);
+        map2.add(46,0);
+        map2.add(48,0);
+        map2.add(96,0);
+        map2.add(98,0);
+        map2.add(22,0);
+        map2.add(24,0);
+        map2.add(10,0);
+        map2.add(63,0);
+        map2.add(68,0);
+        map2.add(94,0);
+        map2.add(44,0);
+        map2.add(87,0);
+        map2.add(84,0);
+        map2.midOrder();
+        System.out.println("");
+        System.out.println("Deleting ");
+        map2.delete(96);
+        map2.delete(68);
+        map2.delete(44);
+        map2.delete(87);
+        map2.delete(84);
+        map2.delete(22);
+        map2.midOrder();
+        
+        System.out.println("\nProject 2: Fernando Vargas, COMP282");
+    }
+    private class Node
+    {
+        public K k;
+        public V v;
+        private int height;
+        public Node left,right;
+        public Node(K k,V v)
+        {
+            this.k=k;
+            this.v=v;
+            height=1;
+        }
+
+        @Override
+        public String toString() 
+        {
+            return "Node{" +
+                    "k=" + k +
+                    ", v=" + v +
+                    '}';
+        }
+    }
+
+    private Node root;
+    private int size;
+
+    public boolean isEmpty(){return size==0;}
+    public int size(){return size;}
+
+    public boolean isBalanced(){
+        return isBalanced(root);
+    }
+    private boolean isBalanced(Node node){
+        if(node ==null)
+            return true;
+        if(Math.abs(balancerFactor(node))>1)
+            return false;
+        return isBalanced(node.left)&&isBalanced(node.right);
+    }
+
+    public int balancerFactor(Node node){
+        if(node ==null)
+            return 0;
+        return getHeight(node.left)-getHeight(node.right);
+    }
+
+    public void add(K k,V v)
+    {
+        root=add(root,k,v);
+    }
+
+    public int getHeight(Node node)
+    {
+        if(node ==null)
+            return 0;
+        return node.height;
+    }
+
+    public Node rightRotate(Node y)
+    {
+        Node x=y.left;
+        Node T2=x.right;
+        x.right=y;
+        y.left=T2;
+        y.height=Math.max(getHeight(y.left),getHeight(y.right))+1;
+        x.height=Math.max(getHeight(x.left),getHeight(x.right))+1;
+        return x;
+    }
+
+    public Node leftRotate(Node y){
+        Node x=y.right;
+        Node T2=x.left;
+        x.left=y;
+        y.right=T2;
+        y.height=Math.max(getHeight(y.left),getHeight(y.right))+1;
+        x.height=Math.max(getHeight(x.left),getHeight(x.right))+1;
+        return x;
+    }
+
+    private Node add(Node node,K k,V v){
+        if(node ==null){
+            size++;
+            return new Node(k,v);
+        }
+        if(k.compareTo(node.k)<0){
+            node.left=add(node.left,k,v);
+        }else if(k.compareTo(node.k)>0){
+            node.right=add(node.right,k,v);
+        }else {
+            node.v=v;
+        }
+        node.height=1+Math.max(getHeight(node.left),getHeight(node.right));
+        if(balancerFactor(node)>1&&balancerFactor(node.left)>=0)
+            return rightRotate(node);
+        if(balancerFactor(node)<-1&&balancerFactor(node.left)<=0)
+            return leftRotate(node);
+        if(balancerFactor(node)>1&&balancerFactor(node.left)<0){
+            node.left=leftRotate(node.left);
+            return rightRotate(node);
+        }
+        if(balancerFactor(node)<-1&&balancerFactor(node.right)>0){
+            node.right=rightRotate(node.right);
+            return leftRotate(node);
+        }
+
+        return node;
+    }
+
+
+    public Node getNode(Node node,K k){
+        if(node ==null)
+            return null;
+        if(k.compareTo(node.k)==0)
+            return node;
+        else if(k.compareTo(node.k)<0){
+            return getNode(node.left,k);
+        }else {
+            return getNode(node.right,k);
+        }
+    }
+
+    public boolean contains(K k){
+        return getNode(root,k)!=null;
+    }
+
+    public V get(K k){
+        Node node = getNode(root, k);
+        return node==null?null:node.v;
+    }
+
+    public void set(K k,V v){
+        Node node = getNode(root, k);
+        if(node==null)
+            throw new IllegalArgumentException(k+"doesn't exist");
+        node.v=v;
+    }
+
+    public void midOrder(){
+        midOrder(root);
+    }
+
+    private void midOrder(Node node){
+        if(node ==null)
+            return;
+        midOrder(node.left);
+        System.out.print(node.toString()+"\t");
+        midOrder(node.right);
+    }
+
+
+    public Node minNode(){
+        return  minNode(root);
+    }
+    private Node minNode(Node node){
+        if(node ==null)
+            return null;
+        while(node.left!=null) node = node.left;
+        return node;
+    }
+
+
+    public V delete(K k){
+        Node node = getNode(root, k);
+        if(node!=null){
+            root=delete(root,k);
+            return node.v;
+        }
+        return null;
+    }
+    private Node delete(Node node,K k){
+        if(node ==null)
+            return null;
+        Node retNode;
+        if (k.compareTo(node.k) == 0) {
+            if(node.left==null){ 
+                Node right= node.right;
+                node.right=null;
+                size--;
+                retNode= right;
+            }
+            else if(node.right==null){ 
+                Node left= node.left;
+                node.left=null;
+                size--;
+                retNode= left;
+            }else{
+                Node rightMin=minNode(node.right);
+                rightMin.right =delete(node.right,rightMin.k);
+                rightMin.left= node.left;
+                node.left= node.right=null;
+                retNode= rightMin;
+            }
+
+        }else if(k.compareTo(node.k)<0){
+            node.left=delete(node.left,k);
+            retNode=node;
+        }else {
+            node.right=delete(node.right,k);
+            retNode=node;
+        }
+
+        if(retNode==null)
+            return null;
+        retNode.height=1+Math.max(getHeight(retNode.left),getHeight(retNode.right));
+        if(balancerFactor(retNode)>1&&balancerFactor(retNode.left)>=0)
+            return rightRotate(retNode);
+        if(balancerFactor(retNode)<-1&&balancerFactor(retNode.left)<=0)
+            return leftRotate(retNode);
+        if(balancerFactor(retNode)>1&&balancerFactor(retNode.left)<0){
+            retNode.left=leftRotate(retNode.left);
+            return rightRotate(retNode);
+        }
+        if(balancerFactor(retNode)<-1&&balancerFactor(retNode.right)>0){
+            retNode.right=rightRotate(retNode.right);
+            return leftRotate(retNode);
+        }
+
+        return retNode;
+    }
+
+
+}
